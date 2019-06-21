@@ -9,8 +9,6 @@
 package com.example.hereapi.locationservices;
 
 import android.Manifest;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -19,7 +17,6 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.View;
 import android.widget.AdapterView;
@@ -35,9 +32,9 @@ import com.here.android.mpa.common.GeoPosition;
 import com.here.android.mpa.common.OnEngineInitListener;
 import com.here.android.mpa.common.PositioningManager;
 import com.here.android.mpa.mapping.Map;
-import com.here.android.mpa.mapping.MapMarker;
 import com.here.android.mpa.mapping.MapRoute;
 import com.here.android.mpa.mapping.SupportMapFragment;
+import com.here.android.mpa.routing.Route;
 import com.here.android.mpa.routing.RouteManager;
 import com.here.android.mpa.routing.RouteOptions;
 import com.here.android.mpa.routing.RoutePlan;
@@ -88,8 +85,13 @@ public class RoutingActivity extends FragmentActivity implements AsyncResponse {
     double latitude = 12.9618;
     double longitude = 80.2382;
 
+    double latwp[];
+    double longwp[];
+
     Button b1;
     Button b2;
+    Button b3;
+    Button b4;
     TextView t1;
     TextView t2;
 
@@ -112,7 +114,7 @@ public class RoutingActivity extends FragmentActivity implements AsyncResponse {
 
         Intent intent7 = getIntent();
         int foremost = intent7.getIntExtra("foremost", 0);
-        if(foremost == 1) {
+        if(foremost > 0) {
             updated = intent7.getBooleanExtra("updated", true);
 
             a = intent7.getDoubleExtra("a", 12.9618);
@@ -123,19 +125,11 @@ public class RoutingActivity extends FragmentActivity implements AsyncResponse {
             latitude = intent7.getDoubleExtra("latitude", 12.9618);
             longitude = intent7.getDoubleExtra("longitude", 80.2382);
 
-            triggerRevGeocodeRequest(a, b, true);
-            triggerRevGeocodeRequest(c, d, false);
-        }
-        else if(foremost == 2) {
-            updated = intent7.getBooleanExtra("updated", true);
+            latwp = intent7.getDoubleArrayExtra("latwp");
+            longwp = intent7.getDoubleArrayExtra("longwp");
 
-            a = intent7.getDoubleExtra("a", 12.9618);
-            b = intent7.getDoubleExtra("b", 80.2382);
-            c = intent7.getDoubleExtra("c", 13.121);
-            d = intent7.getDoubleExtra("d", 80.225);
-
-            latitude = intent7.getDoubleExtra("latitude", 12.9618);
-            longitude = intent7.getDoubleExtra("longitude", 80.2382);
+            default1 = intent7.getStringExtra("default1");
+            default2 = intent7.getStringExtra("default2");
 
             triggerRevGeocodeRequest(a, b, true);
             triggerRevGeocodeRequest(c, d, false);
@@ -143,6 +137,8 @@ public class RoutingActivity extends FragmentActivity implements AsyncResponse {
 
         b1 = findViewById(R.id.pick);
         b2 = findViewById(R.id.drop);
+        b3 = findViewById(R.id.manage);
+        b4 = findViewById(R.id.eta);
         t1 = findViewById(R.id.source);
         t2 = findViewById(R.id.destination);
 
@@ -210,6 +206,10 @@ public class RoutingActivity extends FragmentActivity implements AsyncResponse {
                 intent1.putExtra("latitude", latitude);
                 intent1.putExtra("longitude", longitude);
                 intent1.putExtra("updated", updated);
+                intent1.putExtra("latwp", latwp);
+                intent1.putExtra("longwp", longwp);
+                intent1.putExtra("default1", default1);
+                intent1.putExtra("default2", default2);
                 startActivity(intent1);
                 finish();
             }
@@ -227,7 +227,53 @@ public class RoutingActivity extends FragmentActivity implements AsyncResponse {
                 intent2.putExtra("latitude", latitude);
                 intent2.putExtra("longitude", longitude);
                 intent2.putExtra("updated", updated);
+                intent2.putExtra("latwp", latwp);
+                intent2.putExtra("longwp", longwp);
+                intent2.putExtra("default1", default1);
+                intent2.putExtra("default2", default2);
                 startActivity(intent2);
+                finish();
+            }
+        });
+
+        b3.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // TODO Auto-generated method stub
+                Intent intent10 = new Intent(RoutingActivity.this, Waypoints.class);
+                intent10.putExtra("a", a);
+                intent10.putExtra("b", b);
+                intent10.putExtra("c", c);
+                intent10.putExtra("d", d);
+                intent10.putExtra("latitude", latitude);
+                intent10.putExtra("longitude", longitude);
+                intent10.putExtra("updated", updated);
+                intent10.putExtra("latwp", latwp);
+                intent10.putExtra("longwp", longwp);
+                intent10.putExtra("default1", default1);
+                intent10.putExtra("default2", default2);
+                startActivity(intent10);
+                finish();
+            }
+        });
+
+        b4.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // TODO Auto-generated method stub
+                Intent intent21 = new Intent(RoutingActivity.this, ETA.class);
+                intent21.putExtra("a", a);
+                intent21.putExtra("b", b);
+                intent21.putExtra("c", c);
+                intent21.putExtra("d", d);
+                intent21.putExtra("latitude", latitude);
+                intent21.putExtra("longitude", longitude);
+                intent21.putExtra("updated", updated);
+                intent21.putExtra("latwp", latwp);
+                intent21.putExtra("longwp", longwp);
+                intent21.putExtra("default1", default1);
+                intent21.putExtra("default2", default2);
+                startActivity(intent21);
                 finish();
             }
         });
@@ -407,7 +453,6 @@ public class RoutingActivity extends FragmentActivity implements AsyncResponse {
 
     // Functionality for taps of the "Get Directions" button
     public void getDirections(View view) {
-
         // 1. clear previous results
         textViewResult.setText("");
         if (map != null && mapRoute != null) {
@@ -439,6 +484,12 @@ public class RoutingActivity extends FragmentActivity implements AsyncResponse {
         // START: Source
         routePlan.addWaypoint(new GeoCoordinate(a, b));
 
+        if(latwp != null) {
+            for (int i = 0; i < latwp.length; i++) {
+                routePlan.addWaypoint(new GeoCoordinate(latwp[i], longwp[i]));
+            }
+        }
+
         // END: Destination
         routePlan.addWaypoint(new GeoCoordinate(c, d));
 
@@ -464,8 +515,8 @@ public class RoutingActivity extends FragmentActivity implements AsyncResponse {
                 GeoBoundingBox gbb = result.get(0).getRoute().getBoundingBox();
                 map.zoomTo(gbb, Map.Animation.NONE, Map.MOVE_PRESERVE_ORIENTATION);
 
-                textViewResult.setText(String.format("Route calculated with %d maneuvers.",
-                        result.get(0).getRoute().getManeuvers().size()));
+                textViewResult.setText(String.format("Route calculated with %d maneuvers. (%d km, %d min)",
+                        result.get(0).getRoute().getManeuvers().size(), result.get(0).getRoute().getLength() / 1000, result.get(0).getRoute().getTta(Route.TrafficPenaltyMode.DISABLED, Route.WHOLE_ROUTE).getDuration() / 60));
             } else {
                 textViewResult.setText(
                         String.format("Route calculation failed: %s", errorCode.toString()));
@@ -481,7 +532,7 @@ public class RoutingActivity extends FragmentActivity implements AsyncResponse {
         /* Create a ReverseGeocodeRequest object with a GeoCoordinate. */
         GeoCoordinate coordinate = new GeoCoordinate(x, y);
         String address = new String();
-        ReverseGeocodeListener listener = new ReverseGeocodeListener(g);
+        ReverseGeocodeListener1 listener = new ReverseGeocodeListener1(g);
         listener.delegate = this;
         ReverseGeocodeRequest request = new ReverseGeocodeRequest(coordinate);
         request.execute(listener);
@@ -516,14 +567,14 @@ public class RoutingActivity extends FragmentActivity implements AsyncResponse {
 }
 
 // Implementation of ResultListener
-class ReverseGeocodeListener implements ResultListener<Address> {
+class ReverseGeocodeListener1 implements ResultListener<Address> {
     public AsyncResponse delegate = null;
 
     String street1 = new String();
     String errorCode1 = new String();
     boolean begin;
 
-    public ReverseGeocodeListener(boolean g) {
+    public ReverseGeocodeListener1(boolean g) {
         begin = g;
     }
 

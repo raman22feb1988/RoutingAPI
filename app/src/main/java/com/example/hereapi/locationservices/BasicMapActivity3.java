@@ -22,6 +22,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -30,7 +31,6 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.Toast;
-import android.util.Log;
 import android.view.Menu;
 
 import com.here.android.mpa.common.GeoCoordinate;
@@ -44,11 +44,11 @@ import com.here.android.mpa.search.ErrorCode;
 import com.here.android.mpa.search.ResultListener;
 import com.here.android.mpa.search.TextAutoSuggestionRequest;
 
-public class BasicMapActivity1 extends FragmentActivity implements AsyncResponse2 {
-    private static final String LOG_TAG = BasicMapActivity1.class.getSimpleName();
+public class BasicMapActivity3 extends FragmentActivity implements AsyncResponse4 {
+    private static final String LOG_TAG = BasicMapActivity3.class.getSimpleName();
 
     PopupWindow popupWindow;
-    MapMarker defaultMarker1;
+    MapMarker defaultMarker3;
 
     // permissions request code
     private final static int REQUEST_CODE_ASK_PERMISSIONS = 1;
@@ -60,12 +60,12 @@ public class BasicMapActivity1 extends FragmentActivity implements AsyncResponse
             Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.WRITE_EXTERNAL_STORAGE };
 
     // map embedded in the map fragment
-    private Map map1 = null;
+    private Map map3 = null;
 
     private List<AutoSuggest> suggestions = new ArrayList<AutoSuggest>();
 
     // map fragment embedded in this activity
-    private SupportMapFragment mapFragment1 = null;
+    private SupportMapFragment mapFragment3 = null;
 
     double a;
     double b;
@@ -81,84 +81,135 @@ public class BasicMapActivity1 extends FragmentActivity implements AsyncResponse
     String default1;
     String default2;
 
-    Button b1;
-    Button g1;
-    EditText e1;
+    double e;
+    double f;
+
+    int mode;
+    int index;
+
+    Button b3;
+    Button g3;
+    EditText e3;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        Intent intent13 = getIntent();
+        a = intent13.getDoubleExtra("a", 12.9618);
+        b = intent13.getDoubleExtra("b", 80.2382);
+        c = intent13.getDoubleExtra("c", 13.121);
+        d = intent13.getDoubleExtra("d", 80.225);
+        latitude = intent13.getDoubleExtra("latitude", 12.9618);
+        longitude = intent13.getDoubleExtra("longitude", 80.2382);
+        updated = intent13.getBooleanExtra("updated", true);
+
+        latwp = intent13.getDoubleArrayExtra("latwp");
+        longwp = intent13.getDoubleArrayExtra("longwp");
+
+        default1 = intent13.getStringExtra("default1");
+        default2 = intent13.getStringExtra("default2");
+
+        mode = intent13.getIntExtra("mode", 0);
+        index = intent13.getIntExtra("index", latwp == null? 0 : latwp.length);
+
         checkPermissions();
 
-        b1 = findViewById(R.id.ok1);
-        g1 = findViewById(R.id.reset1);
-        e1 = findViewById(R.id.search1);
+        b3 = findViewById(R.id.ok3);
+        g3 = findViewById(R.id.reset3);
+        e3 = findViewById(R.id.search3);
 
-        Intent intent3 = getIntent();
-        a = intent3.getDoubleExtra("a", 12.9618);
-        b = intent3.getDoubleExtra("b", 80.2382);
-        c = intent3.getDoubleExtra("c", 13.121);
-        d = intent3.getDoubleExtra("d", 80.225);
-        latitude = intent3.getDoubleExtra("latitude", 12.9618);
-        longitude = intent3.getDoubleExtra("longitude", 80.2382);
-        updated = intent3.getBooleanExtra("updated", true);
-
-        latwp = intent3.getDoubleArrayExtra("latwp");
-        longwp = intent3.getDoubleArrayExtra("longwp");
-
-        default1 = intent3.getStringExtra("default1");
-        default2 = intent3.getStringExtra("default2");
-
-        b1.setOnClickListener(new View.OnClickListener() {
+        b3.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent5 = new Intent(BasicMapActivity1.this, RoutingActivity.class);
-                intent5.putExtra("a", a);
-                intent5.putExtra("b", b);
-                intent5.putExtra("c", c);
-                intent5.putExtra("d", d);
-                intent5.putExtra("latitude", latitude);
-                intent5.putExtra("longitude", longitude);
-                intent5.putExtra("updated", updated);
-                intent5.putExtra("latwp", latwp);
-                intent5.putExtra("longwp", longwp);
-                intent5.putExtra("foremost", 1);
-                intent5.putExtra("default1", default1);
-                intent5.putExtra("default2", default2);
-                startActivity(intent5);
+                List<Double> l1 = new ArrayList<Double>();
+                List<Double> l2 = new ArrayList<Double>();
+
+                if(latwp != null)
+                {
+                    for(int y = 0; y < latwp.length; y++)
+                    {
+                        l1.add(latwp[y]);
+                        l2.add(longwp[y]);
+                    }
+                }
+
+                switch(mode)
+                {
+                    case 1:
+                        l1.add(e);
+                        l2.add(f);
+                        break;
+                    case 2:
+                        l1.set(index, e);
+                        l2.set(index, f);
+                        break;
+                    case 3:
+                        l1.add(index, e);
+                        l2.add(index, f);
+                        break;
+                }
+
+                if(l1.size() > 0) {
+                    latwp = new double[l1.size()];
+                    longwp = new double[l2.size()];
+                    for(int i = 0; i < l1.size(); i++)
+                    {
+                        latwp[i] = l1.get(i);
+                        longwp[i] = l2.get(i);
+                    }
+                }
+                else {
+                    latwp = null;
+                    longwp = null;
+                }
+
+                Intent intent14 = new Intent(BasicMapActivity3.this, Waypoints.class);
+                intent14.putExtra("a", a);
+                intent14.putExtra("b", b);
+                intent14.putExtra("c", c);
+                intent14.putExtra("d", d);
+                intent14.putExtra("latitude", latitude);
+                intent14.putExtra("longitude", longitude);
+                intent14.putExtra("updated", updated);
+                intent14.putExtra("latwp", latwp);
+                intent14.putExtra("longwp", longwp);
+                intent14.putExtra("default1", default1);
+                intent14.putExtra("default2", default2);
+                startActivity(intent14);
                 finish();
             }
         });
 
-        g1.setOnClickListener(new View.OnClickListener() {
+        g3.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                a = latitude;
-                b = longitude;
+                e = latitude;
+                f = longitude;
 
-                map1.setCenter(new GeoCoordinate(a, b, 0.0),
+                map3.setCenter(new GeoCoordinate(e, f, 0.0),
                         Map.Animation.NONE);
-                defaultMarker1.setCoordinate(new GeoCoordinate(a, b, 0.0));
+                defaultMarker3.setCoordinate(new GeoCoordinate(e, f, 0.0));
             }
         });
 
-        e1.setOnClickListener(new View.OnClickListener() {
+        e3.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if(popupWindow != null) {
                     popupWindow.dismiss();
                 }
 
-                if((e1.getText()).length() > 0) {
-                    AutoSuggestionQueryListener1 listener = new AutoSuggestionQueryListener1();
-                    listener.delegate = BasicMapActivity1.this;
-                    TextAutoSuggestionRequest request = new TextAutoSuggestionRequest((e1.getText()).toString()).setSearchCenter(map1.getCenter());
+                if((e3.getText()).length() > 0) {
+                    AutoSuggestionQueryListener3 listener = new AutoSuggestionQueryListener3();
+                    listener.delegate = BasicMapActivity3.this;
+                    TextAutoSuggestionRequest request = new TextAutoSuggestionRequest((e3.getText()).toString()).setSearchCenter(map3.getCenter());
                     request.execute(listener);
                 }
             }
         });
 
-        e1.addTextChangedListener(new TextWatcher() {
+        e3.addTextChangedListener(new TextWatcher() {
             public void afterTextChanged(Editable s) {
                 // you can call or do what you want with your EditText here
                 // yourEditText...
@@ -171,10 +222,10 @@ public class BasicMapActivity1 extends FragmentActivity implements AsyncResponse
                     popupWindow.dismiss();
                 }
 
-                if((e1.getText()).length() > 0) {
-                    AutoSuggestionQueryListener1 listener = new AutoSuggestionQueryListener1();
-                    listener.delegate = BasicMapActivity1.this;
-                    TextAutoSuggestionRequest request = new TextAutoSuggestionRequest((e1.getText()).toString()).setSearchCenter(map1.getCenter());
+                if((e3.getText()).length() > 0) {
+                    AutoSuggestionQueryListener3 listener = new AutoSuggestionQueryListener3();
+                    listener.delegate = BasicMapActivity3.this;
+                    TextAutoSuggestionRequest request = new TextAutoSuggestionRequest((e3.getText()).toString()).setSearchCenter(map3.getCenter());
                     request.execute(listener);
                 }
             }
@@ -183,59 +234,116 @@ public class BasicMapActivity1 extends FragmentActivity implements AsyncResponse
 
     @Override
     public void onBackPressed() {
-        Intent intent8 = new Intent(BasicMapActivity1.this, RoutingActivity.class);
-        intent8.putExtra("a", a);
-        intent8.putExtra("b", b);
-        intent8.putExtra("c", c);
-        intent8.putExtra("d", d);
-        intent8.putExtra("latitude", latitude);
-        intent8.putExtra("longitude", longitude);
-        intent8.putExtra("updated", updated);
-        intent8.putExtra("latwp", latwp);
-        intent8.putExtra("longwp", longwp);
-        intent8.putExtra("foremost", 1);
-        intent8.putExtra("default1", default1);
-        intent8.putExtra("default2", default2);
-        startActivity(intent8);
+        List<Double> l3 = new ArrayList<Double>();
+        List<Double> l4 = new ArrayList<Double>();
+
+        if(latwp != null)
+        {
+            for(int z = 0; z < latwp.length; z++)
+            {
+                l3.add(latwp[z]);
+                l4.add(longwp[z]);
+            }
+        }
+
+        switch(mode)
+        {
+            case 1:
+                l3.add(e);
+                l4.add(f);
+                break;
+            case 2:
+                l3.set(index, e);
+                l4.set(index, f);
+                break;
+            case 3:
+                l3.add(index, e);
+                l4.add(index, f);
+                break;
+        }
+
+        if(l3.size() > 0) {
+            latwp = new double[l3.size()];
+            longwp = new double[l4.size()];
+            for(int j = 0; j < l3.size(); j++)
+            {
+                latwp[j] = l3.get(j);
+                longwp[j] = l4.get(j);
+            }
+        }
+        else {
+            latwp = null;
+            longwp = null;
+        }
+
+        Intent intent16 = new Intent(BasicMapActivity3.this, Waypoints.class);
+        intent16.putExtra("a", a);
+        intent16.putExtra("b", b);
+        intent16.putExtra("c", c);
+        intent16.putExtra("d", d);
+        intent16.putExtra("latitude", latitude);
+        intent16.putExtra("longitude", longitude);
+        intent16.putExtra("updated", updated);
+        intent16.putExtra("latwp", latwp);
+        intent16.putExtra("longwp", longwp);
+        intent16.putExtra("default1", default1);
+        intent16.putExtra("default2", default2);
+        startActivity(intent16);
         finish();
     }
 
-    private SupportMapFragment getSupportMapFragment2() {
-        return (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.mapfragment2);
+    private SupportMapFragment getSupportMapFragment4() {
+        return (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.mapfragment4);
     }
 
     private void initialize() {
-        setContentView(R.layout.start);
+        setContentView(R.layout.middle);
+
+        switch(mode)
+        {
+            case 1:
+                e = latitude;
+                f = longitude;
+                break;
+            case 2:
+                e = latwp[index];
+                f = longwp[index];
+                break;
+            case 3:
+                e = latitude;
+                f = longitude;
+                break;
+        }
 
         // Search for the map fragment to finish setup by calling init().
-        mapFragment1 = getSupportMapFragment2();
-        mapFragment1.init(new OnEngineInitListener() {
+        mapFragment3 = getSupportMapFragment4();
+        mapFragment3.init(new OnEngineInitListener() {
             @Override
             public void onEngineInitializationCompleted(OnEngineInitListener.Error error) {
                 if (error == OnEngineInitListener.Error.NONE) {
                     // retrieve a reference of the map from the map fragment
-                    map1 = mapFragment1.getMap();
+                    map3 = mapFragment3.getMap();
                     // Set the map center to the GPS region (no animation)
-                    map1.setCenter(new GeoCoordinate(a, b, 0.0),
+                    map3.setCenter(new GeoCoordinate(e, f, 0.0),
                             Map.Animation.NONE);
                     // Set the zoom level to the average between min and max
-                    map1.setZoomLevel((map1.getMaxZoomLevel() + map1.getMinZoomLevel()) / 2);
+                    map3.setZoomLevel((map3.getMaxZoomLevel() + map3.getMinZoomLevel()) / 2);
 
-                    defaultMarker1 = new MapMarker();
-                    defaultMarker1.setCoordinate(new GeoCoordinate(a, b, 0.0));
-                    defaultMarker1.setDraggable(true);
-                    map1.addMapObject(defaultMarker1);
+                    defaultMarker3 = new MapMarker();
+                    defaultMarker3.setCoordinate(new GeoCoordinate(e, f, 0.0));
+                    defaultMarker3.setDraggable(true);
+                    map3.addMapObject(defaultMarker3);
 
-                    mapFragment1.setMapMarkerDragListener(new MapMarker.OnDragListener() {
+                    mapFragment3.setMapMarkerDragListener(new MapMarker.OnDragListener() {
                         @Override
                         public void onMarkerDrag(MapMarker mapMarker) {
                         }
 
                         @Override
                         public void onMarkerDragEnd(MapMarker mapMarker) {
-                            GeoCoordinate c1 = mapMarker.getCoordinate();
-                            a = c1.getLatitude();
-                            b = c1.getLongitude();
+                            GeoCoordinate c3 = mapMarker.getCoordinate();
+                            e = c3.getLatitude();
+                            f = c3.getLongitude();
                         }
 
                         @Override
@@ -320,8 +428,8 @@ public class BasicMapActivity1 extends FragmentActivity implements AsyncResponse
             public void onItemClick(AdapterView<?> arg0, View v, int arg2, long arg3) {
                 a = latitudelist.get(arg2);
                 b = longitudelist.get(arg2);
-                defaultMarker1.setCoordinate(new GeoCoordinate(a, b, 0.0));
-                map1.setCenter(new GeoCoordinate(a, b, 0.0),
+                defaultMarker3.setCoordinate(new GeoCoordinate(a, b, 0.0));
+                map3.setCenter(new GeoCoordinate(a, b, 0.0),
                         Map.Animation.NONE);
                 if(popupWindow != null) {
                     popupWindow.dismiss();
@@ -333,7 +441,7 @@ public class BasicMapActivity1 extends FragmentActivity implements AsyncResponse
     }
 
     private ArrayAdapter<String> myAdapter(List<String> suggestarray) {
-            ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, suggestarray);
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, suggestarray);
         return adapter;
     }
 
@@ -345,12 +453,12 @@ public class BasicMapActivity1 extends FragmentActivity implements AsyncResponse
 
         suggestions = output1;
         popupWindow = popupWindow();
-        popupWindow.showAsDropDown(e1, -5, 0);
+        popupWindow.showAsDropDown(e3, -5, 0);
     }
 }
 
-class AutoSuggestionQueryListener1 implements ResultListener<List<AutoSuggest>> {
-    public AsyncResponse2 delegate = null;
+class AutoSuggestionQueryListener3 implements ResultListener<List<AutoSuggest>> {
+    public AsyncResponse4 delegate = null;
 
     private List<AutoSuggest> data;
     private ErrorCode error;

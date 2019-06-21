@@ -26,6 +26,15 @@
         <activity
             android:name=".BasicMapActivity2"
             android:label="@string/dropoff" />
+        <activity
+            android:name=".BasicMapActivity3"
+            android:label="@string/add" />
+        <activity
+            android:name=".Waypoints"
+            android:label="@string/manage" />
+        <activity
+            android:name=".ETA"
+            android:label="@string/eta" />
 
         <meta-data
             android:name="com.here.android.maps.appid" android:value="NKLZKx92mb6QzLBiFCaU" />
