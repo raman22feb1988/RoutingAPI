@@ -390,6 +390,8 @@ public class RoutingActivity extends FragmentActivity implements AsyncResponse {
                             Map.Animation.NONE);
                     // Set the map zoom level to the average between min and max (no animation)
                     map.setZoomLevel((map.getMaxZoomLevel() + map.getMinZoomLevel()) / 2);
+
+//                    map.setTrafficInfoVisible(true);
                 } else {
                     Log.e(LOG_TAG, "Cannot initialize SupportMapFragment (" + error + ")");
                 }
